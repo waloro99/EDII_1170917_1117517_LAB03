@@ -13,15 +13,18 @@ namespace LAB03_ED2.Class
         public float RazonCompress { get; set; }
         public float FactorCompress { get; set; }
         public float ReductionPorcent { get; set; }
+        public string Algorithm { get; set; }
+
             
         //method builder
-        public FileCompress(string nfo, string pnf, float rc, float fc, float rp)
+        public FileCompress(string nfo, string pnf, float rc, float fc, float rp, string alg)
         {
             NameFileOriginal = nfo;
             PathNameFile = pnf;
             RazonCompress = rc;
             FactorCompress = fc;
             ReductionPorcent = rp;
+            Algorithm = alg;
         }
 
     }
