@@ -14,7 +14,7 @@ namespace LAB03_ED2.Class
         internal class Node : IComparable<Node>
         {
             public char? Value { get; set; } //value the character
-            public double Probability { get; set; } //frecuenci / total character
+            public double Probability { get; set; } //frecuency / total character
             public Node RightSon { get; set; } //right son
             public Node LeftSon { get; set; } //left son
 
