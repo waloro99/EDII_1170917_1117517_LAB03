@@ -35,7 +35,7 @@ namespace LAB03_ED2.Class
             }
         }//end method compress
 
-        public void Decompress(string rPath, string wPath)
+        public void Uncompress(string rPath, string wPath)
         {
             string text = "";
             List<byte> tempo = new List<byte>();
