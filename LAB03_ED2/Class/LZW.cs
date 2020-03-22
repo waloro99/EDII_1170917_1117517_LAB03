@@ -101,6 +101,21 @@ namespace LAB03_ED2.Class
 
         } //End method decompress
 
+        public string GetFilesMetrics (string Name, string Original, string Compresed)
+        {
+            string Metrics = Name.Replace(".txt", "") + '|';
+            double RC, FC, PR;
+            using (FileStream OR = new FileStream(Original, FileMode.Open))
+            using (FileStream CM = new FileStream(Compresed, FileMode.Open))
+            {
+                RC = Math.Round(CM.Length / (double)OR.Length, 3);
+                FC = Math.Round(OR.Length / (double)CM.Length, 3);
+                PR = Math.Round(((1 - RC) * 100), 2);
+            }
+            Metrics += RC.ToString() + "|" + FC.ToString() + "|" + PR.ToString();
+            return Metrics;
+        } //End method for get file metrics
+
         //-------------------------------------------------------END PUBLIC FUNCTIONS
 
         // PRIVATE FUNCTIONS
