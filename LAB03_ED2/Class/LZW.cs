@@ -10,7 +10,6 @@ namespace LAB03_ED2.Class
 {
     public class LZW
     {
-
         //Public functions 
 
         public void Compress (string rPath, string wPath)
@@ -36,8 +35,73 @@ namespace LAB03_ED2.Class
             }
         }//end method compress
 
+        public void Decompress(string rPath, string wPath)
+        {
+            string text = "";
+            List<byte> tempo = new List<byte>();
+            int count = 0;
+            Dictionary<int, string> diccionary = new Dictionary<int, string>();
+            int index = 0;
 
-        // END PUBLIC FUNCTIONS
+            using (var wfile = new FileStream(wPath, FileMode.OpenOrCreate))
+            using (var bw = new BinaryWriter(wfile))
+            using (var rfile = new FileStream(rPath, FileMode.Open))
+            using (BinaryReader br = new BinaryReader(rfile))
+            {
+                int bufferSize = 1;
+                byte[] Buff = new byte[bufferSize];
+
+                //------- creating dictionary ---------------------
+                while (br.BaseStream.Position != br.BaseStream.Length)
+                {
+                    Buff = br.ReadBytes(bufferSize);
+                    tempo.AddRange(Buff.ToList<byte>());
+                    //read while diccionari isn't create
+                    if (diccionary.Count == 0)
+                    {
+                        if (CEDI(tempo, ref count))
+                        {
+                            diccionary = CreateDictionary(tempo.GetRange(0, count));
+                            index = diccionary.Count + 1;
+                            tempo.RemoveRange(0, count + 3);
+                            break;
+                        }
+                    }
+                }
+
+                List<int> presente = new List<int>();
+                List<int> aux = new List<int>() { Convert.ToInt32(br.ReadByte()) };
+                //------- redoing the text ---------------------
+                while (br.BaseStream.Position != br.BaseStream.Length)
+                {
+                    while (br.BaseStream.Position != br.BaseStream.Length && diccionary.ContainsKey(getNumber(aux)))
+                    {
+                        aux.Add(Convert.ToInt32(br.ReadByte()));
+                    }
+                    if (!diccionary.ContainsKey(getNumber(aux)))
+                    {
+                        presente = aux.GetRange(0, aux.Count - 1);
+                        string value = diccionary[getNumber(presente)];
+                        if (diccionary.ContainsKey(aux.Last())) value += diccionary[aux.Last()][0];
+                        else value += value[value.Length - 1];
+                        diccionary.Add(index, value);
+
+                        bw.Write(Encoding.Default.GetBytes(diccionary[getNumber(presente)]));
+                    }
+                    else
+                    {
+                        bw.Write(Encoding.Default.GetBytes(diccionary[getNumber(presente)]));
+                    }
+                    aux = new List<int>() { aux.Last() };
+                    index++;
+                }
+                //writes the last characters
+                bw.Write(Encoding.Default.GetBytes(diccionary[diccionary.Count]));
+            }
+
+        } //End method decompress
+
+        //-------------------------------------------------------END PUBLIC FUNCTIONS
 
         // PRIVATE FUNCTIONS
         private Dictionary<string, int> GetFileCharacters(BinaryReader br)
@@ -116,9 +180,81 @@ namespace LAB03_ED2.Class
             return rtrnLst.ToArray();
         }// End method get bytes from int
 
+        private static bool CEDI(List<byte> MotherList, ref int count)
+        {
+            List<byte> ChildList = Encoding.ASCII.GetBytes("EOD").ToList<byte>();
+            int MotherElements = MotherList.Count() - 1;
+            int ChildElements = ChildList.Count() - 1;
+            bool Answer = false;
+            for (int i = 0; i <= MotherElements; i++)
+            {
+                for (int j = 0; j <= ChildElements; j++)
+                {
+                    if (i + ChildElements > MotherElements)
+                        return false;
+                    if (MotherList[i + j] == ChildList[j])
+                    {
+                        Answer = true;
+                        if (MotherList[i + j] == ChildList[2] && Answer == true)
+                            count = i;
+                    }
+                    else
+                    {
+                        Answer = false;
+                        break;
+                    }
+                    if (j == ChildElements)
+                        return Answer;
+                }
+            }
+            return true;
+        }//End method check end diccionary
 
+        private static Dictionary<int, string> CreateDictionary(List<byte> table)
+        {
+            Dictionary<int, string> diccionary = new Dictionary<int, string>();
+            char[] Values = Encoding.Default.GetChars(table.ToArray());
+            int counter = 1;
+            int key = default;
+            char value = default;
 
-        //END PRIVATE FUNCTIONS
+            for (int i = 0; i < Values.Count(); i++)
+            {
+                if (counter % 2 == 1)
+                {
+                    if (Values[i] != 44 || Values[i - 1] == 44 && Values[i + 1] == 44) key = Convert.ToByte(Values[i]);
+                    else counter++;
+                }
+                else
+                {
+                    if (Values[i] != 44 || Values[i - 1] == 44 && Values[i + 1] == 44) value = Values[i];
+                    else { diccionary.Add(key, Convert.ToString(value)); counter++; }
+                }
+            }
+
+            Dictionary<int, string> TST_newDic = new Dictionary<int, string>();
+            foreach (var item in diccionary) TST_newDic.Add(item.Key, item.Value);
+            return diccionary;
+        } // End method create diccionary
+
+        private static int getNumber(List<int> values)
+        {
+            byte[] numbers = new byte[values.Count];
+            for (int i = 0; i < values.Count; i++)
+            {
+                numbers[i] = Convert.ToByte(values[i]);
+            }
+            string strg = "";
+            foreach (var item in numbers)
+            {
+                string temp = Convert.ToString(item, 2).PadLeft(8, '0');
+                strg += temp;
+            }
+            int num = Convert.ToInt32(strg, 2);
+            return num;
+        }// End method get number
+
+        //-------------------------------------------------------------------END PRIVATE FUNCTIONS
 
 
     }
