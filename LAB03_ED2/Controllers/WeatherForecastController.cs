@@ -47,7 +47,8 @@ namespace LAB03_ED2.Controllers
                 float rc = Convert.ToInt32(metrics_total[1]);
                 float fc = Convert.ToInt32(metrics_total[2]);
                 float rp = Convert.ToInt32(metrics_total[3]);
-                FileCompress n_compress = new FileCompress(Path_File, Name_new, rc, fc, rp);
+                string algorithm = "";
+                FileCompress n_compress = new FileCompress(Path_File, Name_new, rc, fc, rp,algorithm);
                 lifo.Push(n_compress);
                 return null;
             }
